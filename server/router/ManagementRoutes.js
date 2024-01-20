@@ -3,6 +3,6 @@ const router = express.Router()
 const managementController = require('../controllers/ManagementController')
 
 // API routes
-router.get('/firstApi', managementController.firstApi)
+router.get('/getAcceptanceDictionary', managementController.getAcceptanceDictionary)
 
 module.exports = router
