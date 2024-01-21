@@ -1,4 +1,5 @@
 // App.js
+import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import { useState } from "react";
 import { Bar } from "react-chartjs-2"
@@ -6,24 +7,8 @@ import revenueData from "./data/revenueData";
 import sourceData from "./data/sourceData.json";
 import { PolarArea } from "react-chartjs-2";
 import { Card } from "@material-tailwind/react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+Chart.register(CategoryScale);
 export default function App() {
 
   function getData() {
