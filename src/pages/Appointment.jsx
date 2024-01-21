@@ -1,28 +1,53 @@
 // App.js
-import Chart from "chart.js/auto";
-import { CategoryScale } from "chart.js";
+import { Button, Select, Option, Card } from "@material-tailwind/react";
 import { useState } from "react";
-import { Bar } from "react-chartjs-2"
-import revenueData from "./data/revenueData";
-import sourceData from "./data/sourceData.json";
-import BarChart from "../components/BarChart";
-import { PolarArea } from "react-chartjs-2";
-import { Card, Select, Option } from "@material-tailwind/react";
+import Datepicker from "react-tailwindcss-datepicker";
+import AvailableTimeslots from "../components/AvailableTimeslots";
 
-Chart.register(CategoryScale);
 export default function App() {
+    const [value, setValue] = useState({}); 
 
+        const [isDone, setIsDone] = useState(2)
+
+        const [vehicleValue, setVehicleValue] = useState({}); 
+        
+        const handleValueChange = (newValue) => {
+            setIsDone(isDone-1)
+            setValue(newValue);
+        } 
+
+        // function findAvailableTimes () {
+        //     setIsDone(isDone-1)
+        // }
+
+        const handleVehicleChange = (newVehicleValue) => {
+            setIsDone(isDone-1)
+            setVehicleValue(newVehicleValue.toString());
+        }
     return (
-        <Card>
-            <Select label="Select Vehicle Type">
-            <Option>Compact</Option>
-            <Option>Medium</Option>
-            <Option>Fullsize</Option>
-            <Option>Type 1 Truck</Option>
-            <Option>Type 2 Truck</Option>
-      </Select>
-
-
-        </Card>
+        <div className="grid triple-grid w-full justify-center pt-20">
+            <div className="max-w-sm">
+            <Select value={vehicleValue.toString()} onChange={handleVehicleChange} label="Select Vehicle Type" className="max-w-sm" defaultValue={'Select vehicle type'} >
+                <Option value="Compact">Compact</Option>
+                <Option value="Medium">Medium Size</Option>
+                <Option value="Full Size">Full Size</Option>
+                <Option value="Class 1 Truck">Class 1 Truck</Option>
+                <Option value="Class 2 Truck">Class 2 Truck</Option>
+            </Select>
+            </div>
+            <Datepicker
+            containerClassName="max-w-sm relative border border-gray-500 rounded-md"
+            useRange={false} 
+            value={value}
+            asSingle={true}
+            startFrom="2022-10-01"
+            minDate={new Date("2022-10-01")} 
+            maxDate={new Date("2022-12-01")}
+            onChange={handleValueChange} 
+            /> 
+            <div className="max-w-sm">
+            {isDone<=0 ? <AvailableTimeslots date={value.startDate} vehicleType={vehicleValue.toString()} /> : <Card className="max-w-ms rounded border">Select a vehicle type and date to see booking availabilities</Card>}
+            </div>
+        </div>
     );
 }
