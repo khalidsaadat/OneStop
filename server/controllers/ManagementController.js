@@ -3,8 +3,8 @@ const csv = require("csv-parser");
 
 // Yes
 const vehicleTypes = {
-  "compact": 1,
-  "medium": 2,
+  compact: 1,
+  medium: 2,
   "full-size": 3,
   "class 1 truck": 4,
   "class 2 truck": 5,
@@ -12,8 +12,8 @@ const vehicleTypes = {
 
 // in Skribbl Dollars
 const costDictionary = {
-  "compact": 150,
-  "medium": 150,
+  compact: 150,
+  medium: 150,
   "full-size": 150,
   "class 1 truck": 250,
   "class 2 truck": 700,
@@ -83,36 +83,57 @@ const getAcceptanceDictionary = async (req, res) => {
 
     const typeToKeyMap = {
       "full-size": 1,
-      "medium": 2,
-      "compact": 3,
+      medium: 2,
+      compact: 3,
       "class 1 truck": 4,
       "class 2 truck": 5,
     };
 
+    const reservedTypes = new Set(); // To track types assigned to reserved slots
+    let openSlotStart = 6; // The first open slot index
+
     let dictionary = {
-      1: null,
-      2: null,
-      3: null,
-      4: null,
-      5: null, // Reserved slots
-      6: null,
-      7: null,
-      8: null,
-      9: null,
-      10: null, // Open slots
+      1: { time: null, type: null, available: true },
+      2: { time: null, type: null, available: true },
+      3: { time: null, type: null, available: true },
+      4: { time: null, type: null, available: true },
+      5: { time: null, type: null, available: true }, // Reserved slots
+      6: { time: null, type: null, available: true },
+      7: { time: null, type: null, available: true },
+      8: { time: null, type: null, available: true },
+      9: { time: null, type: null, available: true },
+      10: { time: null, type: null, available: true }, // Open slots
     };
 
     results.forEach((item) => {
-      let typeKey = typeToKeyMap[item.type];
+      let placed = false;
 
-      if (typeKey && !dictionary[typeKey]) {
-        // If the type is mapped and the reserved slot is not occupied
-        dictionary[typeKey] = item;
-      } else {
-        // Try to find an open slot if the reserved slot is occupied
-        for (let i = 6; i <= 10; i++) {
-          if (!dictionary[i]) {
-            dictionary[i] = item;
+      // Check and place in reserved slots (1-5) if the type is unique
+      for (let i = 1; i <= 5; i++) {
+        if (dictionary[i].type === item.type) {
+          break;
+        } else if (!dictionary[i].type && !reservedTypes.has(item.type)) {
+          dictionary[i].time = item.appointment;
+          dictionary[i].type = item.type;
+          dictionary[i].available = false;
+          reservedTypes.add(item.type);
+          placed = true;
+          break;
+        }
+      }
+
+      // If not placed in reserved slots, try open slots (6-10)
+      if (!placed) {
+        for (let i = openSlotStart; i <= 10; i++) {
+          if (!dictionary[i].type) {
+            dictionary[i].time = item.appointment;
+            dictionary[i].type = item.type;
+            dictionary[i].available = false;
+            placed = true;
+            break;
+          } else if (dictionary[i].type === item.type) {
+            // dictionary[i].qty++;
+            // placed = true;
             break;
           }
         }
