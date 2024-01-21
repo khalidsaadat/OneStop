@@ -78,6 +78,7 @@ const addToAcceptedDictionary = (acceptedDictionary, item) => {
   const type = vehicleTypes[item.type];
   if (acceptedDictionary.hasOwnProperty(type)) {
     acceptedDictionary[type].qty += 1;
+    acceptedDictionary[type].label = item.type;
     acceptedDictionary[type].month = item.appointment.split(" ")[0].split("-")[1];
     acceptedDictionary[type].revenue =
       costDictionary[type] * acceptedDictionary[type].qty;
@@ -88,6 +89,7 @@ const addToAcceptedDictionary = (acceptedDictionary, item) => {
       qty: 1,
       month: item.appointment.split(" ")[0].split("-")[1],
       revenue: 0,
+      label: '',
     };
   }
 };
@@ -300,11 +302,11 @@ const getAcceptedDictionary = async (req, res) => {
     const results = await parseCSV();
 
     let acceptedDictionary = {
-      1: { qty: 0, month: null, revenue: 0 },
-      2: { qty: 0, month: null, revenue: 0 },
-      3: { qty: 0, month: null, revenue: 0 },
-      4: { qty: 0, month: null, revenue: 0 },
-      5: { qty: 0, month: null, revenue: 0 }, // Reserved slots
+      1: { qty: 0, month: null, revenue: 0, label: '' },
+      2: { qty: 0, month: null, revenue: 0, label: '' },
+      3: { qty: 0, month: null, revenue: 0, label: '' },
+      4: { qty: 0, month: null, revenue: 0, label: '' },
+      5: { qty: 0, month: null, revenue: 0, label: '' }, // Reserved slots
     };
 
     for (let i = 0; i < results.length; i++) {
