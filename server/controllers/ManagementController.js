@@ -78,9 +78,15 @@ const getOccupiedDictionary = async (req, res) => {
       for (let i = 1; i <= 5; i++) {
         if (!dictionary[i].type && !reservedTypes.has(item.type)) {
           dictionary[i].type = vehicleTypes[item.type];
-          dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
+          dictionary[i].time = addMinutesToTime(
+            item.appointment.split(" ")[1],
+            durationDictionary[vehicleTypes[item.type]]
+          );
           dictionary[i].available = false;
-          dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
+          dictionary[i].category = findCategory(
+            item.created.split(" ")[1],
+            item.appointment.split(" ")[1]
+          );
           reservedTypes.add(item.type);
           placed = true;
           break;
@@ -91,10 +97,16 @@ const getOccupiedDictionary = async (req, res) => {
       if (!placed) {
         for (let i = openSlotStart; i <= 10; i++) {
           if (!dictionary[i].type) {
-            dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
+            dictionary[i].time = addMinutesToTime(
+              item.appointment.split(" ")[1],
+              durationDictionary[vehicleTypes[item.type]]
+            );
             dictionary[i].type = vehicleTypes[item.type];
             dictionary[i].available = false;
-            dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
+            dictionary[i].category = findCategory(
+              item.created.split(" ")[1],
+              item.appointment.split(" ")[1]
+            );
             placed = true;
             break;
           }
