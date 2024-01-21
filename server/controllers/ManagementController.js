@@ -1,6 +1,10 @@
 const fs = require("fs");
 const csv = require("csv-parser");
-const { addMinutesToTime, findCategory } = require("../functions");
+const {
+  addMinutesToTime,
+  findCategory,
+  convertTimeToMinutes,
+} = require("../functions");
 
 // Yes
 const vehicleTypes = {
@@ -13,11 +17,11 @@ const vehicleTypes = {
 
 // in Skribbl Dollars
 const costDictionary = {
-  compact: 150,
-  medium: 150,
-  "full-size": 150,
-  "class 1 truck": 250,
-  "class 2 truck": 700,
+  1: 150,
+  2: 150,
+  3: 150,
+  4: 250,
+  5: 700,
 };
 
 // in minutes
@@ -52,37 +56,160 @@ const parseCSV = () => {
   });
 };
 
+const addToDeniedDictionary = (deniedDictionary, item) => {
+  const type = vehicleTypes[item.type];
+  if (deniedDictionary.hasOwnProperty(type)) {
+    deniedDictionary[type].qty += 1;
+    deniedDictionary[type].month = item.appointment.split(" ")[0].split("-")[1];
+    deniedDictionary[type].loss =
+      costDictionary[type] * deniedDictionary[type].qty;
+  } else {
+    // If the key does not exist in the dictionary, initialize it
+    console.log("denieds are: ", type);
+    deniedDictionary[type] = {
+      qty: 1,
+      month: item.appointment.split(" ")[0].split("-")[1],
+      loss: 0,
+    };
+  }
+};
+
 const getOccupiedDictionary = async (req, res) => {
   try {
     const results = await parseCSV();
     const reservedTypes = new Set(); // To track types assigned to reserved slots
     const openSlotStart = 6; // The first open slot index
 
-    let dictionary = {
-      1: { time: null, type: null, available: true, category: null },
-      2: { time: null, type: null, available: true, category: null },
-      3: { time: null, type: null, available: true, category: null },
-      4: { time: null, type: null, available: true, category: null },
-      5: { time: null, type: null, available: true, category: null }, // Reserved slots
-      6: { time: null, type: null, available: true, category: null },
-      7: { time: null, type: null, available: true, category: null },
-      8: { time: null, type: null, available: true, category: null },
-      9: { time: null, type: null, available: true, category: null },
-      10: { time: null, type: null, available: true, category: null }, // Open slots
+    let occupiedDictionary = {
+      1: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      2: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      3: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      4: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      5: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      }, // Reserved slots
+      6: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      7: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      8: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      9: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      },
+      10: {
+        time: null,
+        date: null,
+        type: null,
+        available: true,
+        category: null,
+      }, // Open slots
     };
 
-    results.forEach((item) => {
+    let successfullyPlaced = 0;
+    let rejectionCount = 0;
+
+    for (let i = 0; i < results.length; i++) {
+      let item = results[i];
       let placed = false;
+
+      // Rejection criteria
+      if (
+        addMinutesToTime(
+          item.appointment.split(" ")[1],
+          durationDictionary[vehicleTypes[item.type]]
+        ) >= "19:00"
+      ) {
+        rejectionCount += 1;
+        continue;
+      }
+
+      for (let i = 1; i <= 10; i++) {
+        const occupiedTime = convertTimeToMinutes(
+          occupiedDictionary[i].time || "00:00"
+        );
+        const appointmentTime = convertTimeToMinutes(
+          item.appointment.split(" ")[1]
+        );
+
+        if (occupiedTime <= appointmentTime) {
+          // clear reserved set if the type is equal to occupied dictionary
+          if (occupiedDictionary[i].type === vehicleTypes[item.type]) {
+            reservedTypes.delete(item.type);
+          }
+
+          occupiedDictionary[i].time = null;
+          occupiedDictionary[i].type = null;
+          occupiedDictionary[i].date = null;
+          occupiedDictionary[i].available = true;
+          occupiedDictionary[i].category = null;
+        }
+      }
 
       // Check and place in reserved slots (1-5) if the type is unique
       for (let i = 1; i <= 5; i++) {
-        if (!dictionary[i].type && !reservedTypes.has(item.type)) {
-          dictionary[i].type = vehicleTypes[item.type];
-          dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
-          dictionary[i].available = false;
-          dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
+        if (!occupiedDictionary[i].type && !reservedTypes.has(item.type)) {
+          occupiedDictionary[i].type = vehicleTypes[item.type];
+          occupiedDictionary[i].time = addMinutesToTime(
+            item.appointment.split(" ")[1],
+            durationDictionary[vehicleTypes[item.type]]
+          );
+          occupiedDictionary[i].date = item.appointment;
+          occupiedDictionary[i].available = false;
+          occupiedDictionary[i].category = findCategory(
+            item.created.split(" ")[1],
+            item.appointment.split(" ")[1]
+          );
           reservedTypes.add(item.type);
           placed = true;
+          successfullyPlaced += 1;
           break;
         }
       }
@@ -90,19 +217,61 @@ const getOccupiedDictionary = async (req, res) => {
       // If not placed in reserved slots, try open slots (6-10)
       if (!placed) {
         for (let i = openSlotStart; i <= 10; i++) {
-          if (!dictionary[i].type) {
-            dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
-            dictionary[i].type = vehicleTypes[item.type];
-            dictionary[i].available = false;
-            dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
+          if (!occupiedDictionary[i].type) {
+            occupiedDictionary[i].time = addMinutesToTime(
+              item.appointment.split(" ")[1],
+              durationDictionary[vehicleTypes[item.type]]
+            );
+            occupiedDictionary[i].type = vehicleTypes[item.type];
+            occupiedDictionary[i].date = item.appointment;
+            occupiedDictionary[i].available = false;
+            occupiedDictionary[i].category = findCategory(
+              item.created.split(" ")[1],
+              item.appointment.split(" ")[1]
+            );
             placed = true;
+            successfullyPlaced += 1;
             break;
           }
         }
       }
-    });
+    }
+    console.log("rejection count:", rejectionCount);
+    res.status(200).json(occupiedDictionary);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-    res.status(200).json(dictionary);
+const getDeniedDictionary = async (req, res) => {
+  try {
+    const results = await parseCSV();
+
+    let deniedDictionary = {
+      1: { qty: 0, month: null, loss: 0 },
+      2: { qty: 0, month: null, loss: 0 },
+      3: { qty: 0, month: null, loss: 0 },
+      4: { qty: 0, month: null, loss: 0 },
+      5: { qty: 0, month: null, loss: 0 }, // Reserved slots
+    };
+
+    for (let i = 0; i < results.length; i++) {
+      let item = results[i];
+      let placed = false;
+
+      // Rejection criteria
+      if (
+        addMinutesToTime(
+          item.appointment.split(" ")[1],
+          durationDictionary[vehicleTypes[item.type]]
+        ) >= "19:00"
+      ) {
+        addToDeniedDictionary(deniedDictionary, item);
+        continue;
+      }
+    }
+
+    res.status(200).json(deniedDictionary);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -110,5 +279,5 @@ const getOccupiedDictionary = async (req, res) => {
 
 module.exports = {
   getOccupiedDictionary,
-  //   generateReport,
+  getDeniedDictionary,
 };

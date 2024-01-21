@@ -23,7 +23,13 @@ const findCategory = (createTime, appointmentTime) => {
   return 'walk-in'
 };
 
+const convertTimeToMinutes = (timeString) => {
+  const [hours, minutes] = timeString.split(':');
+  return hours * 60 + minutes;
+}
+
 module.exports = {
   addMinutesToTime,
-  findCategory
+  findCategory,
+  convertTimeToMinutes
 };
