@@ -74,6 +74,24 @@ const addToDeniedDictionary = (deniedDictionary, item) => {
   }
 };
 
+const addToAcceptedDictionary = (acceptedDictionary, item) => {
+  const type = vehicleTypes[item.type];
+  if (acceptedDictionary.hasOwnProperty(type)) {
+    acceptedDictionary[type].qty += 1;
+    acceptedDictionary[type].month = item.appointment.split(" ")[0].split("-")[1];
+    acceptedDictionary[type].revenue =
+      costDictionary[type] * acceptedDictionary[type].qty;
+  } else {
+    // If the key does not exist in the dictionary, initialize it
+    console.log("denieds are: ", type);
+    acceptedDictionary[type] = {
+      qty: 1,
+      month: item.appointment.split(" ")[0].split("-")[1],
+      revenue: 0,
+    };
+  }
+};
+
 const getOccupiedDictionary = async (req, res) => {
   try {
     const results = await parseCSV();
@@ -277,7 +295,41 @@ const getDeniedDictionary = async (req, res) => {
   }
 };
 
+const getAcceptedDictionary = async (req, res) => {
+  try {
+    const results = await parseCSV();
+
+    let acceptedDictionary = {
+      1: { qty: 0, month: null, revenue: 0 },
+      2: { qty: 0, month: null, revenue: 0 },
+      3: { qty: 0, month: null, revenue: 0 },
+      4: { qty: 0, month: null, revenue: 0 },
+      5: { qty: 0, month: null, revenue: 0 }, // Reserved slots
+    };
+
+    for (let i = 0; i < results.length; i++) {
+      let item = results[i];
+
+      // Rejection criteria
+      if (
+        addMinutesToTime(
+          item.appointment.split(" ")[1],
+          durationDictionary[vehicleTypes[item.type]]
+        ) <= "19:00"
+      ) {
+        addToAcceptedDictionary(acceptedDictionary, item);
+        continue;
+      }
+    }
+
+    res.status(200).json(acceptedDictionary);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getOccupiedDictionary,
   getDeniedDictionary,
+  getAcceptedDictionary,
 };
