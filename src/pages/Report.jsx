@@ -7,51 +7,31 @@ import revenueData from "./data/revenueData";
 import sourceData from "./data/sourceData.json";
 import { PolarArea } from "react-chartjs-2";
 import { Card } from "@material-tailwind/react";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 Chart.register(CategoryScale);
 export default function App() {
 
-  function getData() {
-
-  }
+  const {data: revenueByTypeAndMonth} = useQuery(
+    'accepted-dict',
+    () => {
+      return axios.get('http://localhost:8080/api/management/getAcceptedDictionary')
+    }
+  )
 
     return (
         <div>
+          {/* {data?.data.length} */}
         <Card className="items-center w-full">
-        <Card id="test" className="max-w-sm">
-          <label for='test'>hello</label>
-            <Bar
-            data={{
-            labels: sourceData.map((data) => data.label),
-            datasets: [
-                {
-                label: "Gained Revenue",
-                data: sourceData.map((data) => data.value),
-                backgroundColor: [
-                    "rgba(43, 63, 229, 0.8)"
-                ],
-                borderRadius: 3,
-                },
-                {
-                    label: "Missed Revenue",
-                    data: sourceData.map((data) => data.value),
-                    backgroundColor: [
-                    "rgba(250, 192, 19, 0.8)",
-                    ],
-                    borderRadius: 3,
-                },
-            ],
-            }}
-            options={{
-            plugins: {
-                title: {
-                text: "Revenue Source",
-                },
-            },
-            }}
-        />
-      </Card>
       <div className="w-full flex-row flex justify-center">
+
+        {
+          revenueByTypeAndMonth?.data['1'].qty
+        }
+        {
+          
+        }
       <Card className="max-w-sm">
       <PolarArea
               data={{
