@@ -3,6 +3,6 @@ const router = express.Router()
 const managementController = require('../controllers/ManagementController')
 
 // API routes
-router.get('/getAcceptanceDictionary', managementController.getAcceptanceDictionary)
+router.get('/getOccupiedDictionary', managementController.getOccupiedDictionary)
 
 module.exports = router

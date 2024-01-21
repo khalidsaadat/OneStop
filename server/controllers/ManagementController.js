@@ -1,5 +1,6 @@
 const fs = require("fs");
 const csv = require("csv-parser");
+const { addMinutesToTime } = require("../functions");
 
 // Yes
 const vehicleTypes = {
@@ -51,46 +52,11 @@ const parseCSV = () => {
   });
 };
 
-const getAcceptanceDictionary = async (req, res) => {
+const getOccupiedDictionary = async (req, res) => {
   try {
     const results = await parseCSV();
-    // let mediumCount = 0;
-
-    // // create a dictionary for base
-    // let occupiedDictionary = {
-    //     1: {},
-    //     2: {},
-    //     3: {},
-    //     4: {},
-    //     5: {},
-    //     6: {},
-    //     7: {},
-    //     8: {},
-    //     9: {},
-    //     10: {},
-    // };
-
-    // results.map((row) => {
-    //   const createdDate = new Date(row.created);
-    //   const appointmentDate = new Date(row.appointment);
-    //   const type = row.type;
-
-    //   const vehicleType = vehicleTypes[type];
-
-    //   occupiedDictionary[vehicleType] = {}
-    // })
-    // res.status(200).json(mediumCount);
-
-    const typeToKeyMap = {
-      "full-size": 1,
-      medium: 2,
-      compact: 3,
-      "class 1 truck": 4,
-      "class 2 truck": 5,
-    };
-
     const reservedTypes = new Set(); // To track types assigned to reserved slots
-    let openSlotStart = 6; // The first open slot index
+    const openSlotStart = 6; // The first open slot index
 
     let dictionary = {
       1: { time: null, type: null, available: true },
@@ -110,11 +76,9 @@ const getAcceptanceDictionary = async (req, res) => {
 
       // Check and place in reserved slots (1-5) if the type is unique
       for (let i = 1; i <= 5; i++) {
-        if (dictionary[i].type === item.type) {
-          break;
-        } else if (!dictionary[i].type && !reservedTypes.has(item.type)) {
-          dictionary[i].time = item.appointment;
-          dictionary[i].type = item.type;
+        if (!dictionary[i].type && !reservedTypes.has(item.type)) {
+          dictionary[i].type = vehicleTypes[item.type];
+          dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
           dictionary[i].available = false;
           reservedTypes.add(item.type);
           placed = true;
@@ -126,14 +90,10 @@ const getAcceptanceDictionary = async (req, res) => {
       if (!placed) {
         for (let i = openSlotStart; i <= 10; i++) {
           if (!dictionary[i].type) {
-            dictionary[i].time = item.appointment;
-            dictionary[i].type = item.type;
+            dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
+            dictionary[i].type = vehicleTypes[item.type];
             dictionary[i].available = false;
             placed = true;
-            break;
-          } else if (dictionary[i].type === item.type) {
-            // dictionary[i].qty++;
-            // placed = true;
             break;
           }
         }
@@ -147,6 +107,6 @@ const getAcceptanceDictionary = async (req, res) => {
 };
 
 module.exports = {
-  getAcceptanceDictionary,
+  getOccupiedDictionary,
   //   generateReport,
 };
