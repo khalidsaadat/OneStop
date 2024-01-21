@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Compact",
+    "count": 4,
+    "revenue": 600,
+    "month": ""
+  },
+  {
+    "label": "Medium",
+    "count": 12,
+    "revenue": 1800,
+    "month": ""
+  },
+  {
+    "label": "Full Size",
+    "count": 10,
+    "revenue": 1500,
+    "month": ""
+  },
+  {
+    "label": "Class 1 Truck",
+    "count": 6,
+    "revenue": 600,
+    "month": ""
+  },
+  {
+    "label": "Class 2 Truck",
+    "count": 8,
+    "revenue": 5600,
+    "month": ""
+  }
+]

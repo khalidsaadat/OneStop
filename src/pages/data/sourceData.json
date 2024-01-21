@@ -1,0 +1,26 @@
+[
+    {
+      "label": "Gained Revenue",
+      "type": "gain",
+      "value": 32,
+      "month": "10"
+    },
+    {
+      "label": "Gained Revenue",
+      "type": "gain",
+      "value": 29,
+      "month": "11"
+    },
+    {
+      "label": "Missed Revenue",
+      "type": "loss",
+      "value": 45,
+      "month": "10"
+    },
+    {
+      "label": "Missed Revenue",
+      "type": "loss",
+      "value": 40,
+      "month": "11"
+    }
+  ]

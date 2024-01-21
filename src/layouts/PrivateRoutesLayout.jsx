@@ -7,7 +7,8 @@ const PrivateRoutesLayout = () => {
         <Outlet />
     ) : (
         // keep the previous navigation stack
-        <Navigate to="/login" state={{ from: location }} replace />
+        // <Navigate to="/reports" state={{ from: location }} replace />
+        console.log("uncomment this")
     )
 }
 

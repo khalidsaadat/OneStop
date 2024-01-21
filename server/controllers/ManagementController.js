@@ -60,6 +60,7 @@ const addToDeniedDictionary = (deniedDictionary, item) => {
   const type = vehicleTypes[item.type];
   if (deniedDictionary.hasOwnProperty(type)) {
     deniedDictionary[type].qty += 1;
+    deniedDictionary[type].label = item.type;
     deniedDictionary[type].month = item.appointment.split(" ")[0].split("-")[1];
     deniedDictionary[type].loss =
       costDictionary[type] * deniedDictionary[type].qty;
@@ -268,11 +269,11 @@ const getDeniedDictionary = async (req, res) => {
     const results = await parseCSV();
 
     let deniedDictionary = {
-      1: { qty: 0, month: null, loss: 0 },
-      2: { qty: 0, month: null, loss: 0 },
-      3: { qty: 0, month: null, loss: 0 },
-      4: { qty: 0, month: null, loss: 0 },
-      5: { qty: 0, month: null, loss: 0 }, // Reserved slots
+      1: { qty: 0, month: null, loss: 0, label: '' },
+      2: { qty: 0, month: null, loss: 0, label: '' },
+      3: { qty: 0, month: null, loss: 0, label: '' },
+      4: { qty: 0, month: null, loss: 0, label: '' },
+      5: { qty: 0, month: null, loss: 0, label: '' }, // Reserved slots
     };
 
     for (let i = 0; i < results.length; i++) {
