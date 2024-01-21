@@ -10,6 +10,20 @@ const addMinutesToTime = (timeString, minutesToAdd) => {
   return `${hours}:${minutes}`;
 };
 
+const findCategory = (createTime, appointmentTime) => {
+  const timeDifference = Math.abs(
+    new Date(`1970-01-01 ${createTime}`) -
+      new Date(`1970-01-01 ${appointmentTime}`)
+  );
+
+  if(createTime !== appointmentTime) {
+    return 'reserved'
+  }
+
+  return 'walk-in'
+};
+
 module.exports = {
   addMinutesToTime,
+  findCategory
 };

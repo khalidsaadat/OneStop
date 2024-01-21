@@ -1,6 +1,6 @@
 const fs = require("fs");
 const csv = require("csv-parser");
-const { addMinutesToTime } = require("../functions");
+const { addMinutesToTime, findCategory } = require("../functions");
 
 // Yes
 const vehicleTypes = {
@@ -59,16 +59,16 @@ const getOccupiedDictionary = async (req, res) => {
     const openSlotStart = 6; // The first open slot index
 
     let dictionary = {
-      1: { time: null, type: null, available: true },
-      2: { time: null, type: null, available: true },
-      3: { time: null, type: null, available: true },
-      4: { time: null, type: null, available: true },
-      5: { time: null, type: null, available: true }, // Reserved slots
-      6: { time: null, type: null, available: true },
-      7: { time: null, type: null, available: true },
-      8: { time: null, type: null, available: true },
-      9: { time: null, type: null, available: true },
-      10: { time: null, type: null, available: true }, // Open slots
+      1: { time: null, type: null, available: true, category: null },
+      2: { time: null, type: null, available: true, category: null },
+      3: { time: null, type: null, available: true, category: null },
+      4: { time: null, type: null, available: true, category: null },
+      5: { time: null, type: null, available: true, category: null }, // Reserved slots
+      6: { time: null, type: null, available: true, category: null },
+      7: { time: null, type: null, available: true, category: null },
+      8: { time: null, type: null, available: true, category: null },
+      9: { time: null, type: null, available: true, category: null },
+      10: { time: null, type: null, available: true, category: null }, // Open slots
     };
 
     results.forEach((item) => {
@@ -80,6 +80,7 @@ const getOccupiedDictionary = async (req, res) => {
           dictionary[i].type = vehicleTypes[item.type];
           dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
           dictionary[i].available = false;
+          dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
           reservedTypes.add(item.type);
           placed = true;
           break;
@@ -93,6 +94,7 @@ const getOccupiedDictionary = async (req, res) => {
             dictionary[i].time = addMinutesToTime(item.appointment.split(" ")[1], durationDictionary[vehicleTypes[item.type]]);
             dictionary[i].type = vehicleTypes[item.type];
             dictionary[i].available = false;
+            dictionary[i].category = findCategory(item.created.split(" ")[1], item.appointment.split(" ")[1]);
             placed = true;
             break;
           }
